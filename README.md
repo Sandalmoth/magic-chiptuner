@@ -14,11 +14,24 @@ keyboard) to full music! This should be possible, since there is plenty of free
 midi music available for training data.
 
 ## Basic design plan/TODO
-- parse midi into some text based format
-- standardize rhythms
+- parse midi into some ~~text based format~~ vector of bytes
+- ~~standardize rhythms~~ just use midi quantization
 - generate simple melody version of training data by stripping chords, drums, fast notes
 - transpose to all 12 keys
 - train some kind of network on generating complex data from simplifyed (seq2seq?)
 - implement streaming midi to text conversion
 - feed into network
 - restore output to midi
+
+### Work log ###
+_2020-11-26_  
+Read midi, remove percussion, extract melody (? on last one).
+
+_2020-11-27_  
+Remove broken files from training data. Discover training data uses full range
+of notes from 0 to 127. Implement conversion to string of bytes.
+
+## Preemptive QnA
+_Why chiptuner?_  
+The training data I have is gameboy/nes music, so, that's what it's gonna learn.
+
