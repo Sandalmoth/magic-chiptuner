@@ -31,6 +31,11 @@ _2020-11-27_
 Remove broken files from training data. Discover training data uses full range
 of notes from 0 to 127. Implement conversion to string of bytes.
 
+_2020-11-28_  
+Simplify melody by removing chords. Implement autocorrelation for finding beat
+though performance is not amazing (though maybe ok enough) and simpified rhythm
+to have no more than one note per calculated beat.
+
 ## Preemptive QnA
 _Why chiptuner?_  
 The training data I have is gameboy/nes music, so, that's what it's gonna learn.

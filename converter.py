@@ -3,6 +3,8 @@ try:
 except:
     import pickle
 
+import random
+
 import click
 from mido import MidiFile, MidiTrack, second2tick
 
@@ -28,16 +30,76 @@ def standardize_rhythm(mid):
     pass
 
 
+def find_beat(v):
+    """
+    find the beat of a vector format midi using the autocorrelation function
+    """
+
+    v2 = [0 for __ in range(len(v))]
+    j = 0
+    for note in v:
+        if note == 0:
+            j += 1
+        else:
+            v2[j] = 1
+
+
+    result = []
+    # no need to check more than 24*4 = 96
+    # i.e. 4 quarter notes of standard midi
+    for lag in range(96):
+        s = 0
+        for i in range(len(v2)):
+            if v2[i] > 0 and v2[(i + lag) % len(v2)] > 0:
+                s += 1
+        result.append((lag, s))
+    # print(result)
+    # print(sorted(result, key=lambda x: x[1]))
+    return sorted(result, key=lambda x: x[1])[-2][0]
+
+
 def simplify(v):
     """
     simplify vector format file to a suitable simple melody
     """
     # TODO
     # idea:
-    # find a common beat frequency (with fourier transform?)
-    # remove notes not on the common beat if they have neighbours that are
-    # remove chords by selecting a (random?) note
-    pass
+    #   find a common beat frequency (with fourier transform?)
+    #   remove notes not on the common beat if they have neighbours that are
+    #   remove chords by selecting a (random?) note
+    simple = []
+    chord = []
+    # remove chords
+    for note in v:
+        # may be a note, or an end of chord
+        # first, gather up everything played simultaneously
+        if note == 0:
+            # if the chord ends, add a note at random
+            if len(chord) > 0:
+                simple.append(random.choice(chord))
+            simple.append(0)
+            chord = []
+        else:
+            chord.append(note)
+    simple2 = []
+    # simplify rhythm
+    beat = find_beat(simple)
+    print(beat)
+    # simply make sure there is no more than 1 note in each beat segment
+    j = 0
+    found = False
+    for note in simple:
+        if note == 0:
+            j += 1
+            simple2.append(0)
+            if j % beat == 0:
+                found = False
+        else:
+            if not found:
+                simple2.append(note)
+                found = True
+
+    return simple2
 
 
 # so, midi notes seem to be in the [0, 127] range
@@ -138,6 +200,9 @@ def to_text(infiles):
 
         v_full = vectorize(mid_full)
         v_melody = vectorize(mid_melody)
+        v_melody = simplify(v_melody)
+        print(v_full.count(0), v_melody.count(0))
+        # assert v_full.count(0) == v_melody.count(0)  # same number of steps
         with open(outfull, 'wb') as f:
             pickle.dump(v_full, f)
         with open(outsimple, 'wb') as f:
