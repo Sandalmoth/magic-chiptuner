@@ -1,7 +1,9 @@
-try:
-    import cPickle as pickle
-except:
-    import pickle
+# try:
+#     import cPickle as pickle
+# except:
+#     import pickle
+
+import numpy as np
 
 import random
 import os
@@ -99,6 +101,9 @@ def simplify(v):
             simple2.append(0)
             if j % beat == 0:
                 found = False
+        elif note == 1:
+            j += 1
+            simple2.append(1)
         else:
             if not found:
                 simple2.append(note)
@@ -137,7 +142,7 @@ def vectorize(mid):
             for __ in range(int(dt)):
                 v.append(STEP_END)
             v.append(msg.note + 128)
-    v.append(SONG_END)
+    # v.append(SONG_END)
     return v
 
 
@@ -150,7 +155,7 @@ def transpose(v, offset):
     for note in v:
         if note >= 128:
             tn = note + offset
-            if tn >= 0 and tn < 128:
+            if tn >= 128 and tn < 256:
                 t.append(tn)
         else:
             t.append(note)
@@ -224,15 +229,17 @@ def to_text(infiles):
         # assert v_full.count(0) == v_melody.count(0)  # same number of steps
 
         outfile = os.path.splitext(os.path.basename(infile))[0]
-        for i in range(-12, 13):
-            tfull = transpose(v_full, i)
-            tmelody = transpose(v_melody, i)
+        for i in range(-5, 7):
+            tfull = np.array(transpose(v_full, i), dtype='uint8')
+            tmelody = np.array(transpose(v_melody, i), dtype='uint8')
             outfull = 'data/txt/' + outfile + '_' + str(i) + '.full'
             outsimple = 'data/txt/' + outfile + '_' + str(i) + '.simple'
-            with open(outfull, 'wb') as f:
-                pickle.dump(tfull, f)
-            with open(outsimple, 'wb') as f:
-                pickle.dump(tmelody, f)
+            np.save(outfull, tfull)
+            np.save(outsimple, tmelody)
+            # with open(outfull, 'wb') as f:
+            #     pickle.dump(tfull, f)
+            # with open(outsimple, 'wb') as f:
+            #     pickle.dump(tmelody, f)
 
 
 

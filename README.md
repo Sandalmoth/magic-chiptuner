@@ -38,7 +38,8 @@ to have no more than one note per calculated beat.
 
 _2020-11-29_  
 Transpose and save files with sensible filename. Set the transposition to
--12 -> +12 semitones, to ensure that there should be good data for most melodies.
+-5 -> +6 semitones, to ensure that there should be good data for most melodies.
+I would do more, but had to save on harddrive space... We'll see if it's enough.
 
 ## Preemptive QnA
 _Why chiptuner?_  
