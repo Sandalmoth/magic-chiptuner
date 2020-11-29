@@ -56,7 +56,11 @@ def find_beat(v):
         result.append((lag, s))
     # print(result)
     # print(sorted(result, key=lambda x: x[1]))
-    return sorted(result, key=lambda x: x[1])[-2][0]
+    k = 1
+    srt = sorted(result, key=lambda x: x[1])
+    while srt[-k][0] == 0:
+        k += 1
+    return srt[-k][0]
 
 
 def simplify(v):
