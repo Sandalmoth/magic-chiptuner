@@ -4,6 +4,7 @@ except:
     import pickle
 
 import random
+import os
 
 import click
 from mido import MidiFile, MidiTrack, second2tick
@@ -136,6 +137,20 @@ def vectorize(mid):
     return v
 
 
+def transpose(v, offset):
+    """
+    transpose vector format midi
+    discards note that go out of the 0, 127 range
+    """
+    t = []
+    for note in v:
+        if note >= 128:
+            tn = note + offset
+            if tn >= 0 and tn < 128:
+                t.append(tn)
+        else:
+            t.append(tn)
+    return tn
 
 
 
@@ -151,8 +166,8 @@ def to_text(infiles):
     Generates an output with all notes, and a simplifyied melody.
     """
     # TODO make a function that lives up to that description
-    outfull = 'data/txt/tmp.mid'
-    outsimple = 'data/txt/tmp2.mid'
+    # outfull = 'data/txt/tmp.mid'
+    # outsimple = 'data/txt/tmp2.mid'
 
     mn = 999
     mx = 0
@@ -181,8 +196,8 @@ def to_text(infiles):
             mid_melody.tracks.append(melody_track[:])
 
         # save tracks for testing
-        mid_full.save(outfull)
-        mid_melody.save(outsimple)
+        # mid_full.save(outfull)
+        # mid_melody.save(outsimple)
 
         # TODO
         # normalize to identical time signature/bpm somehow
@@ -203,10 +218,17 @@ def to_text(infiles):
         v_melody = simplify(v_melody)
         print(v_full.count(0), v_melody.count(0))
         # assert v_full.count(0) == v_melody.count(0)  # same number of steps
-        with open(outfull, 'wb') as f:
-            pickle.dump(v_full, f)
-        with open(outsimple, 'wb') as f:
-            pickle.dump(v_melody, f)
+
+        outfile = os.path.splitext(os.path.basename(infile))[0]
+        for i in range(-12, 13):
+            tfull = transpose(v_full, i)
+            tmelody = transpose(v_melody, i)
+            outfull = 'data/txt/' + outfile + '_' + str(i) + '.full'
+            outsimple = 'data/txt/' + outfile + '_' + str(i) + '.simple'
+            with open(outfull, 'wb') as f:
+                pickle.dump(tfull, f)
+            with open(outsimple, 'wb') as f:
+                pickle.dump(tmelody, f)
 
 
 

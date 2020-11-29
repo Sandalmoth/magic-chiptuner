@@ -36,6 +36,10 @@ Simplify melody by removing chords. Implement autocorrelation for finding beat
 though performance is not amazing (though maybe ok enough) and simpified rhythm
 to have no more than one note per calculated beat.
 
+_2020-11-29_  
+Transpose and save files with sensible filename. Set the transposition to
+-12 -> +12 semitones, to ensure that there should be good data for most melodies.
+
 ## Preemptive QnA
 _Why chiptuner?_  
 The training data I have is gameboy/nes music, so, that's what it's gonna learn.
