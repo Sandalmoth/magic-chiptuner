@@ -150,7 +150,7 @@ def transpose(v, offset):
                 t.append(tn)
         else:
             t.append(note)
-    return tn
+    return t
 
 
 
