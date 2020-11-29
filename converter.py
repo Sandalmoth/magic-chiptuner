@@ -149,7 +149,7 @@ def transpose(v, offset):
             if tn >= 0 and tn < 128:
                 t.append(tn)
         else:
-            t.append(tn)
+            t.append(note)
     return tn
 
 
