@@ -41,6 +41,10 @@ Transpose and save files with sensible filename. Set the transposition to
 -5 -> +6 semitones, to ensure that there should be good data for most melodies.
 I would do more, but had to save on harddrive space... We'll see if it's enough.
 
+_2019-11-30_  
+Implement some seq2seq (according to a reference, see code). also implement loading
+data and parsing into torch tensors.
+
 ## Preemptive QnA
 _Why chiptuner?_  
 The training data I have is gameboy/nes music, so, that's what it's gonna learn.
