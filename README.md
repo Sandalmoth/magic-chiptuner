@@ -18,7 +18,7 @@ midi music available for training data.
 - ~~standardize rhythms~~ just use midi quantization
 - generate simple melody version of training data by stripping chords, drums, fast notes
 - transpose to all 12 keys
-- train some kind of network on generating complex data from simplifyed (seq2seq?)
+- train seq2seq model on generating complex data from simplifyed
 - implement streaming midi to text conversion
 - feed into network
 - restore output to midi
@@ -44,6 +44,11 @@ I would do more, but had to save on harddrive space... We'll see if it's enough.
 _2019-11-30_  
 Implement some seq2seq (according to a reference, see code). also implement loading
 data and parsing into torch tensors.
+
+_2019-12-01_  
+Implement model training (same reference). Probably need to read up a bit more on
+exactly how torch wants the data, because there's a lot of errors. Either way,
+I can probably get rid of the encoding layer? Also: #devember I guess.
 
 ## Preemptive QnA
 _Why chiptuner?_  
