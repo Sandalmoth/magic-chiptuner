@@ -41,14 +41,20 @@ Transpose and save files with sensible filename. Set the transposition to
 -5 -> +6 semitones, to ensure that there should be good data for most melodies.
 I would do more, but had to save on harddrive space... We'll see if it's enough.
 
-_2019-11-30_  
+_2020-11-30_  
 Implement some seq2seq (according to a reference, see code). also implement loading
 data and parsing into torch tensors.
 
-_2019-12-01_  
+_2020-12-01_  
 Implement model training (same reference). Probably need to read up a bit more on
 exactly how torch wants the data, because there's a lot of errors. Either way,
 I can probably get rid of the encoding layer? Also: #devember I guess.
+
+_2020-12-02_  
+Time to jump back and start with a minimal working example of pytorch seq2seq!
+The minimal example seems to have worked, though I changed the data representation
+slightly, making each token a rhythmic time step. This way, the rhythm of the
+input should be better preserved during the transformation.
 
 ## Preemptive QnA
 _Why chiptuner?_  
