@@ -56,6 +56,11 @@ The minimal example seems to have worked, though I changed the data representati
 slightly, making each token a rhythmic time step. This way, the rhythm of the
 input should be better preserved during the transformation.
 
+_2020-12-03_  
+Initial work on redoing file conversion to be compatible with the new code. I think
+I should do the translation dictionaries right away so that I dont have to save
+any intermediate (large) tuple formats.
+
 ## Preemptive QnA
 _Why chiptuner?_  
 The training data I have is gameboy/nes music, so, that's what it's gonna learn.
