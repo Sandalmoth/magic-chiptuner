@@ -61,6 +61,11 @@ Initial work on redoing file conversion to be compatible with the new code. I th
 I should do the translation dictionaries right away so that I dont have to save
 any intermediate (large) tuple formats.
 
+_2020-12-04_  
+New conversion up and running, but in the interest of saving hard drive space
+I'm gonna have to switch to dynamically generating the training tensors on demand
+rather than precomputing and storing them.
+
 ## Preemptive QnA
 _Why chiptuner?_  
 The training data I have is gameboy/nes music, so, that's what it's gonna learn.

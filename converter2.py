@@ -1,6 +1,7 @@
 import random
-import pickle
 import os
+import numpy as np
+import pickle
 
 import click
 from mido import MidiFile, MidiTrack, second2tick
@@ -9,6 +10,12 @@ from mido import MidiFile, MidiTrack, second2tick
 NO_NOTE = -1
 SOS = -2
 EOS = -3
+
+
+simple_forward = {(x, ): i for i, x in enumerate([NO_NOTE, SOS, EOS])}
+simple_backward = {i: (x, ) for i, x in enumerate([NO_NOTE, SOS, EOS])}
+full_forward = {(x, ): i for i, x in enumerate([NO_NOTE, SOS, EOS])}
+full_backward = {i: (x, ) for i, x in enumerate([NO_NOTE, SOS, EOS])}
 
 
 @click.group()
@@ -91,6 +98,35 @@ def simplify(v):
     return s
 
 
+def transposed(v, k):
+    t = []
+    for msg in v:
+        z = []
+        for x in msg:
+            if x < 0:
+                z.append(x)
+            else:
+                tn = x + k
+                if tn >= 0 and tn < 128:
+                    z.append(tn)
+        if len(z) == 0:
+            z.append(NO_NOTE)
+        t.append(tuple(z))
+    return t
+
+
+def add_to_simple_dict(v):
+    for token in v:
+        simple_forward[token] = len(simple_forward)
+        simple_backward[len(simple_backward)] = token
+
+
+def add_to_full_dict(v):
+    for token in v:
+        full_forward[token] = len(full_forward)
+        full_backward[len(full_backward)] = token
+
+
 @main.command()
 @click.argument('infiles', nargs=-1, type=click.Path())
 def from_midi(infiles):
@@ -106,10 +142,27 @@ def from_midi(infiles):
         v_full = to_vector(mid)
         v_simple = simplify(v_full)
 
-        outfile = 'data/txt/' + \
-                  os.path.splitext(os.path.basename(infile))[0] + '.bin'
-        with open(outfile, 'wb') as f:
-            pickle.dump({'src': v_simple, 'trg': v_full}, f)
+        outfile = 'data/txt/' + os.path.splitext(os.path.basename(infile))[0]
+        for t in range(-12, 12):
+            t_simple = transposed(v_simple, t)
+            add_to_simple_dict(t_simple)
+            t_full = transposed(v_full, t)
+            add_to_full_dict(t_full)
+
+            a_simple = np.array([simple_forward[x] for x in t_simple])
+            np.save(outfile + '_' + str(t) + '.simple', a_simple)
+            a_full = np.array([full_forward[x] for x in t_full])
+            np.save(outfile + '_' + str(t) + '.full', a_full)
+
+    # save dictionaries so we can get midi back later
+    with open('simple_forward.dict', 'wb') as f:
+        pickle.dump(simple_forward, f)
+    with open('simple_backward.dict', 'wb') as f:
+        pickle.dump(simple_backward, f)
+    with open('full_forward.dict', 'wb') as f:
+        pickle.dump(full_forward, f)
+    with open('full_backward.dict', 'wb') as f:
+        pickle.dump(full_backward, f)
 
 
 if __name__ == '__main__':
