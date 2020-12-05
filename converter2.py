@@ -49,7 +49,16 @@ def to_vector(mid):
             j += 1
         v[j].append(msg.note)
 
-    return [tuple(x) if len(x) > 0 else (-1,) for x in v]
+    result = []
+    for x in v:
+        if len(x) == 0:
+            result.append(NO_NOTE, )
+        elif len(x) > 3:
+            result.append(tuple(random.sample(x, 3)))
+        else:
+            result.append(tuple(x))
+    # return [tuple(x) if len(x) > 0 else (-1,) for x in v]
+    return result
 
 
 def find_beat(v):
@@ -82,7 +91,10 @@ def simplify(v):
     # i.e. remove chords by selecting a random note
     s = []
     for x in v:
-        s.append((random.choice(x), ))
+        if len(x) > 1:
+            s.append((random.choice(x), ))
+        else:
+            s.append(x)
 
     # simplify rhythm
     # i.e. keep only the first note in each beat length segment

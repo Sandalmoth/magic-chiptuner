@@ -68,7 +68,10 @@ rather than precomputing and storing them.
 
 _2020-12-05_  
 Dynamic generation has a separate issue, in that we need to process everything
-so that we can accurately set the output dimension of the network.
+so that we can accurately set the output dimension of the network. I think that
+using a single network to produce all the output instruments necessitates an
+excessively large output language that just won't work. New idea: Use a single
+input network and several output networks that play together.
 
 ## Preemptive QnA
 _Why chiptuner?_  
