@@ -2,9 +2,11 @@ import random
 import os
 import numpy as np
 import pickle
+import gc
 
 import click
 from mido import MidiFile, MidiTrack, second2tick
+import torch
 
 
 NO_NOTE = -1
@@ -163,6 +165,63 @@ def from_midi(infiles):
         pickle.dump(full_forward, f)
     with open('full_backward.dict', 'wb') as f:
         pickle.dump(full_backward, f)
+
+
+@main.command()
+@click.argument('infiles', nargs=-1, type=click.Path())
+def build_dicts(infiles):
+    for infile in infiles:
+        print('parsing', infile)
+        mid = MidiFile(infile)
+        v_full = to_vector(mid)
+        v_simple = simplify(v_full)
+
+        for t in range(-12, 13):
+            t_simple = transposed(v_simple, t)
+            add_to_simple_dict(t_simple)
+            t_full = transposed(v_full, t)
+            add_to_full_dict(t_full)
+
+        gc.collect()
+        print(len(full_forward))
+
+    with open('simple_forward.dict', 'wb') as f:
+        pickle.dump(simple_forward, f)
+    with open('simple_backward.dict', 'wb') as f:
+        pickle.dump(simple_backward, f)
+    with open('full_forward.dict', 'wb') as f:
+        pickle.dump(full_forward, f)
+    with open('full_backward.dict', 'wb') as f:
+        pickle.dump(full_backward, f)
+
+
+
+def get_data(infiles, device):
+    """
+    Dynamically produce a pair of simple/full tensors for training
+    """
+    random.shuffle(infiles)
+    while True:
+        for infile in infiles:
+            mid = MidiFile(infile)
+            v_full = to_vector(mid)
+            v_simple = simplify(v_full)
+
+            t = random.randint(-12, 12)
+            t_simple = transposed(v_simple, t)
+            t_full = transposed(v_full, t)
+
+            src_tensor = torch.tensor(
+                [simple_forward[x] for x in t_simple],
+                dtype=torch.long, device=device
+            ).view(-1, 1)
+            trg_tensor = torch.tensor(
+                [full_forward[x] for x in t_full],
+                dtype=torch.long, device=device
+            ).view(-1, 1)
+
+            # yield {'src': src_tensor, 'trg': trg_tensor}
+            yield src_tensor, trg_tensor
 
 
 if __name__ == '__main__':

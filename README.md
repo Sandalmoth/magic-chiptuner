@@ -66,6 +66,10 @@ New conversion up and running, but in the interest of saving hard drive space
 I'm gonna have to switch to dynamically generating the training tensors on demand
 rather than precomputing and storing them.
 
+_2020-12-05_  
+Dynamic generation has a separate issue, in that we need to process everything
+so that we can accurately set the output dimension of the network.
+
 ## Preemptive QnA
 _Why chiptuner?_  
 The training data I have is gameboy/nes music, so, that's what it's gonna learn.
