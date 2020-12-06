@@ -73,6 +73,11 @@ using a single network to produce all the output instruments necessitates an
 excessively large output language that just won't work. New idea: Use a single
 input network and several output networks that play together.
 
+_2020-12-06_  
+New training data generation, intended to train four separate seq2seq networks
+simultaneously. I have a suspicion that this four-brained-ness won't sound very
+good, but I'm gonna try it before I trash it.
+
 ## Preemptive QnA
 _Why chiptuner?_  
 The training data I have is gameboy/nes music, so, that's what it's gonna learn.

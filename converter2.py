@@ -1,8 +1,6 @@
 import random
 import os
 import numpy as np
-import pickle
-import gc
 
 import click
 from mido import MidiFile, MidiTrack, second2tick
@@ -13,11 +11,15 @@ NO_NOTE = -1
 SOS = -2
 EOS = -3
 
+# by eliminating chords completely, we can drastically simplify the
+# input/output language
 
-simple_forward = {(x, ): i for i, x in enumerate([NO_NOTE, SOS, EOS])}
-simple_backward = {i: (x, ) for i, x in enumerate([NO_NOTE, SOS, EOS])}
-full_forward = {(x, ): i for i, x in enumerate([NO_NOTE, SOS, EOS])}
-full_backward = {i: (x, ) for i, x in enumerate([NO_NOTE, SOS, EOS])}
+lang_forward = {(x, ): i for i, x in enumerate(
+    [NO_NOTE, SOS, EOS] + list(range(128))
+)}
+lang_backward = {i: (x, ) for i, x in enumerate(
+    [NO_NOTE, SOS, EOS] + list(range(128))
+)}
 
 
 @click.group()
@@ -112,6 +114,29 @@ def simplify(v):
     return s
 
 
+def get_satb(v):
+    """
+    Take a vector format file and return four separate melodies
+    """
+    s = []
+    a = []
+    t = []
+    b = []
+    for x in v:
+        if len(x) > 1:
+            c = sorted(list(x))
+            s.append((c[-1], ))
+            a.append((random.choice(x), ))
+            t.append((random.choice(x), ))
+            b.append((c[0], ))
+        else:
+            s.append(x)
+            a.append(x)
+            t.append(x)
+            b.append(x)
+    return s, a, t, b
+
+
 def transposed(v, k):
     t = []
     for msg in v:
@@ -127,18 +152,6 @@ def transposed(v, k):
             z.append(NO_NOTE)
         t.append(tuple(z))
     return t
-
-
-def add_to_simple_dict(v):
-    for token in v:
-        simple_forward[token] = len(simple_forward)
-        simple_backward[len(simple_backward)] = token
-
-
-def add_to_full_dict(v):
-    for token in v:
-        full_forward[token] = len(full_forward)
-        full_backward[len(full_backward)] = token
 
 
 @main.command()
@@ -159,53 +172,14 @@ def from_midi(infiles):
         outfile = 'data/txt/' + os.path.splitext(os.path.basename(infile))[0]
         for t in range(-12, 12):
             t_simple = transposed(v_simple, t)
-            add_to_simple_dict(t_simple)
+            # add_to_simple_dict(t_simple)
             t_full = transposed(v_full, t)
-            add_to_full_dict(t_full)
+            # add_to_full_dict(t_full)
 
-            a_simple = np.array([simple_forward[x] for x in t_simple])
+            a_simple = np.array([lang_forward[x] for x in t_simple])
             np.save(outfile + '_' + str(t) + '.simple', a_simple)
-            a_full = np.array([full_forward[x] for x in t_full])
+            a_full = np.array([lang_forward[x] for x in t_full])
             np.save(outfile + '_' + str(t) + '.full', a_full)
-
-    # save dictionaries so we can get midi back later
-    with open('simple_forward.dict', 'wb') as f:
-        pickle.dump(simple_forward, f)
-    with open('simple_backward.dict', 'wb') as f:
-        pickle.dump(simple_backward, f)
-    with open('full_forward.dict', 'wb') as f:
-        pickle.dump(full_forward, f)
-    with open('full_backward.dict', 'wb') as f:
-        pickle.dump(full_backward, f)
-
-
-@main.command()
-@click.argument('infiles', nargs=-1, type=click.Path())
-def build_dicts(infiles):
-    for infile in infiles:
-        print('parsing', infile)
-        mid = MidiFile(infile)
-        v_full = to_vector(mid)
-        v_simple = simplify(v_full)
-
-        for t in range(-12, 13):
-            t_simple = transposed(v_simple, t)
-            add_to_simple_dict(t_simple)
-            t_full = transposed(v_full, t)
-            add_to_full_dict(t_full)
-
-        gc.collect()
-        print(len(full_forward))
-
-    with open('simple_forward.dict', 'wb') as f:
-        pickle.dump(simple_forward, f)
-    with open('simple_backward.dict', 'wb') as f:
-        pickle.dump(simple_backward, f)
-    with open('full_forward.dict', 'wb') as f:
-        pickle.dump(full_forward, f)
-    with open('full_backward.dict', 'wb') as f:
-        pickle.dump(full_backward, f)
-
 
 
 def get_data(infiles, device):
@@ -222,18 +196,36 @@ def get_data(infiles, device):
             t = random.randint(-12, 12)
             t_simple = transposed(v_simple, t)
             t_full = transposed(v_full, t)
+            s, a, t, b = get_satb(t_full)
 
             src_tensor = torch.tensor(
-                [simple_forward[x] for x in t_simple],
+                [lang_forward[x] for x in t_simple],
                 dtype=torch.long, device=device
             ).view(-1, 1)
-            trg_tensor = torch.tensor(
-                [full_forward[x] for x in t_full],
+            trg_tensor_s = torch.tensor(
+                [lang_forward[x] for x in s],
+                dtype=torch.long, device=device
+            ).view(-1, 1)
+            trg_tensor_a = torch.tensor(
+                [lang_forward[x] for x in a],
+                dtype=torch.long, device=device
+            ).view(-1, 1)
+            trg_tensor_t = torch.tensor(
+                [lang_forward[x] for x in t],
+                dtype=torch.long, device=device
+            ).view(-1, 1)
+            trg_tensor_b = torch.tensor(
+                [lang_forward[x] for x in b],
                 dtype=torch.long, device=device
             ).view(-1, 1)
 
-            # yield {'src': src_tensor, 'trg': trg_tensor}
-            yield src_tensor, trg_tensor
+            yield {
+                'src': src_tensor,
+                'trg_s': trg_tensor_s,
+                'trg_a': trg_tensor_a,
+                'trg_t': trg_tensor_t,
+                'trg_b': trg_tensor_b
+            }
 
 
 if __name__ == '__main__':
