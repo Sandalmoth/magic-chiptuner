@@ -78,6 +78,11 @@ New training data generation, intended to train four separate seq2seq networks
 simultaneously. I have a suspicion that this four-brained-ness won't sound very
 good, but I'm gonna try it before I trash it.
 
+_2020-12-07_  
+Model training setup with the new data. Chunked the data a bit for performance.
+It is still outrageously slow however. I may have to switch approach again,
+though I kinda wanna try training it overnight to see what it learns.
+
 ## Preemptive QnA
 _Why chiptuner?_  
 The training data I have is gameboy/nes music, so, that's what it's gonna learn.
