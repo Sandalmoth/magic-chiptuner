@@ -167,6 +167,7 @@ def get_data(infiles, device):
     random.shuffle(infiles)
     while True:
         for infile in infiles:
+            print(infile)
             mid = MidiFile(infile)
             v_full = to_vector(mid)
             v_simple = simplify(v_full)
@@ -196,6 +197,17 @@ def get_data(infiles, device):
                 [lang_forward[x] for x in b],
                 dtype=torch.long, device=device
             ).view(-1, 1)
+
+            if tuple(src_tensor.shape) != (128, 1):
+                continue
+
+            print(
+                src_tensor.shape,
+                trg_tensor_s.shape,
+                trg_tensor_a.shape,
+                trg_tensor_t.shape,
+                trg_tensor_b.shape,
+            )
 
             yield [{
                 'src': src_tensor,
@@ -381,7 +393,8 @@ def train(infiles):
         if valid_loss < best_valid_loss:
             best_valid_loss = valid_loss
             for i, s in enumerate(['s', 'a', 't', 'b']):
-                torch.save(models[i].state_dict(), 'model_' + s + '.pt')
+                torch.save(models[i].state_dict(), 'state_dict_' + s + '.pt')
+                torch.save(models[i], 'model_' + s + '.pt')
 
         print(epoch, end_time - start_time, train_loss, valid_loss, sep='\t')
         epoch += 1
@@ -392,6 +405,55 @@ def train(infiles):
     # model.load_state_dict(torch.load('minimal.pt'))
     # test_loss = _evaluate(model, data, criterion)
     # print('test_loss', test_loss)
+
+
+def _generate(models, data):
+    result = []
+    for i, model in enumerate(models):
+        model.eval()
+        with torch.no_grad():
+
+            output = model(data, data, 0)
+            output_dim = output.shape[-1]
+            output = output[1:].view(-1, output_dim)
+            result.append(list(output))
+
+    return result
+
+
+def to_midi(vs):
+    """
+    Produce midi format from vectors
+    """
+    mid = MidiFile()
+    for v in vs:
+        track = MidiTrack()
+        for msg in v:
+            topv, topi = msg.topk(1)
+            print(topv, topi)
+
+        mid.tracks.append(track[:])
+    return mid
+
+
+@main.command()
+@click.argument('infile', type=click.Path())
+def test(infile):
+    device = torch.device('cpu')
+    models = []
+    for i, s in enumerate(['s', 'a', 't', 'b']):
+        models.append(torch.load('model_' + s + '.pt'))
+
+    mid = MidiFile(infile)
+    v_full = to_vector(mid)
+    v_simple = simplify(v_full)
+    src_tensor = torch.tensor(
+        [lang_forward[x] for x in v_simple],
+        dtype=torch.long, device=device
+    ).view(-1, 1)
+
+    full = _generate(models, src_tensor)
+    res = to_midi(full)
 
 
 if __name__ == '__main__':

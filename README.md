@@ -1,6 +1,7 @@
 # magic-chiptuner
 Improving simple melodies realtime!
 
+
 ## Idea
 When we play guitar hero or similar, there's a really simple music representation
 in the five buttons + rhythm thing, yet it still feels like we're playing.
@@ -13,6 +14,7 @@ I will instead focus on transforming a simple midi melody (e.g. played on the
 keyboard) to full music! This should be possible, since there is plenty of free
 midi music available for training data.
 
+
 ## Basic design plan/TODO
 - parse midi into some ~~text based format~~ vector of bytes
 - ~~standardize rhythms~~ just use midi quantization
@@ -22,6 +24,7 @@ midi music available for training data.
 - implement streaming midi to text conversion
 - feed into network
 - restore output to midi
+
 
 ### Work log ###
 _2020-11-26_  
@@ -83,7 +86,16 @@ Model training setup with the new data. Chunked the data a bit for performance.
 It is still outrageously slow however. I may have to switch approach again,
 though I kinda wanna try training it overnight to see what it learns.
 
+_2020-12-09_  
+No progress yesterday, as I messed up and crashed the training by giving it an
+html file among the midis. Anyway... I'm gonna train once more but also save the
+whole model, not just the state dict for easier loading (I think). Also added
+some machinery needed to playing the result as sound.
+
+_2020-12-10_  
+It learned to always be silent. _Nice._ Time for a new approach.
+
+
 ## Preemptive QnA
 _Why chiptuner?_  
 The training data I have is gameboy/nes music, so, that's what it's gonna learn.
-

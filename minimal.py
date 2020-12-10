@@ -261,7 +261,7 @@ def train(model, data, optimizer, criterion, clip):
     return epoch_loss/len(data)
 
 
-def evaluate(model, data, criterion):
+def evaluate(model, data, criterion, prnt=False):
     model.eval()
     epoch_loss = 0
     with torch.no_grad():
@@ -278,6 +278,9 @@ def evaluate(model, data, criterion):
             loss = criterion(output, trg)
 
             epoch_loss += loss.item()
+
+            if prnt:
+                print(list(output))
 
     return epoch_loss/len(data)
 
@@ -302,5 +305,5 @@ for epoch in range(N_EPOCHS):
 
 # load best model and test
 model.load_state_dict(torch.load('minimal.pt'))
-test_loss = evaluate(model, data, criterion)
+test_loss = evaluate(model, data, criterion, prnt=True)
 print('test_loss', test_loss)
