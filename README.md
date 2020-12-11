@@ -95,6 +95,12 @@ some machinery needed to playing the result as sound.
 _2020-12-10_  
 It learned to always be silent. _Nice._ Time for a new approach.
 
+_2020-12-10_  
+I am going to try a convolutional approach. Basically, represent music as a 2d
+vector of time and pitch. The last (time) column holds just the current simplifyed
+melody, the rest holds the all the notes played so far. The output is the full
+melody at the current step (i.e. what notes are currently playing). So, task
+number one will be to convert midi to such a 2d format (and back).
 
 ## Preemptive QnA
 _Why chiptuner?_  
