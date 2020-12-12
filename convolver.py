@@ -1,9 +1,10 @@
 import click
 from mido import MidiFile, MidiTrack, second2tick, Message
 import numpy as np
+import torch
 
 
-MIDI_CHUNK = 128  # leads to nice 128x128 states
+MIDI_CHUNK = 4096  # leads to nice 128x128 states
 
 
 @click.group()
@@ -78,19 +79,45 @@ def test_save_vector_as_midi(v):
     mid.save('test.mid')
 
 
+class Net(torch.nn.Module):
+    def __init__(self):
+        super(Net, self).__init__()
+        self.layer1 = torch.nn.Sequential(
+            torch.nn.Conv2d(1, 32, kernel_size=5, stride=1, padding=2),
+            torch.nn.ReLU(),
+            torch.nn.MaxPool2d(kernel_size=2, stride=2)
+        )
+        self.layer2 = torch.nn.Sequential(
+            torch.nn.Conv2d(32, 64, kernel_size=5, stride=1, padding=2),
+            torch.nn.ReLU(),
+            torch.nn.MaxPool2d(kernel_size=2, stride=2)
+        )
+        self.drop_out = torch.nn.Dropout()
+
+    def forward(self, x):
+        out = self.layer1(x)
+        out = self.layer2(out)
+        out = out.reshape(out.size(0), -1)
+        print(out.shape)
+        out = self.drop_out(out)
+
+
 @main.command()
 @click.argument('infile', type=click.Path())
 def test(infile):
     import matplotlib.pyplot as plt
     mid = MidiFile(infile)
-    v = to_vector(mid)
+    v = to_vector(mid)[:, :4096]
     fig, axs = plt.subplots()
     axs.imshow(v, aspect=15/1)
     fig.set_size_inches(15, 2)
     plt.show()
     test_save_vector_as_midi(v)
 
-
+    device = torch.device('cpu')
+    net = Net()
+    t = torch.tensor(v, device=device)
+    net.forward(t)
 
 
 if __name__ == '__main__':

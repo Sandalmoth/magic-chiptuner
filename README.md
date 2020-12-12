@@ -102,6 +102,12 @@ melody, the rest holds the all the notes played so far. The output is the full
 melody at the current step (i.e. what notes are currently playing). So, task
 number one will be to convert midi to such a 2d format (and back).
 
+_2020-12-11_  
+Implemented music-image interconversion.
+
+_2020-12-12_  
+Beginning of convnet implementation, so I'm learning how to set it up.
+
 ## Preemptive QnA
 _Why chiptuner?_  
 The training data I have is gameboy/nes music, so, that's what it's gonna learn.
