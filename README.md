@@ -95,18 +95,22 @@ some machinery needed to playing the result as sound.
 _2020-12-10_  
 It learned to always be silent. _Nice._ Time for a new approach.
 
-_2020-12-10_  
+_2020-12-11_  
 I am going to try a convolutional approach. Basically, represent music as a 2d
 vector of time and pitch. The last (time) column holds just the current simplifyed
 melody, the rest holds the all the notes played so far. The output is the full
 melody at the current step (i.e. what notes are currently playing). So, task
 number one will be to convert midi to such a 2d format (and back).
 
-_2020-12-11_  
-Implemented music-image interconversion.
-
 _2020-12-12_  
 Beginning of convnet implementation, so I'm learning how to set it up.
+
+_2020-12-14_  
+I think it's working and training, so it's time to run for a bit and see if
+it works any better! The network architecture is a mixture between a random
+guess and the biggest I could fit in RAM. Next time I buy a computer, I guess
+I'm gonna bump it up a bit.
+
 
 ## Preemptive QnA
 _Why chiptuner?_  

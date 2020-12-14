@@ -1,1 +1,6 @@
 data
+*.pt
+*.dat
+*.bak
+*.dir
+*.mid
