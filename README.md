@@ -111,6 +111,14 @@ it works any better! The network architecture is a mixture between a random
 guess and the biggest I could fit in RAM. Next time I buy a computer, I guess
 I'm gonna bump it up a bit.
 
+_2020-12-16_  
+Wrote some code to generate test output. Had to do some extremely silly numpy-
+torch interconversion to avoid memory leak from assigning slices in place.
+Supposedly setting requires_grad=False should stop that, but it didn't seem to work.
+In addition, this is far too slow for real time music generation running on my cpu.
+It needs to be about 100-1000 times faster I think. Ultimately, it only learned
+to play one note, so, that's not very impressive either...
+
 
 ## Preemptive QnA
 _Why chiptuner?_  

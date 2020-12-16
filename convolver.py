@@ -116,6 +116,14 @@ def test_save_vector_as_midi(v):
     mid.save('test.mid')
 
 
+def plot_vector(v):
+    import matplotlib.pyplot as plt
+    fig, axs = plt.subplots()
+    axs.imshow(v[0, 0, :, :], aspect=15/1)
+    fig.set_size_inches(15, 2)
+    plt.show()
+
+
 class Net(torch.nn.Module):
     def __init__(self):
         super(Net, self).__init__()
@@ -137,7 +145,10 @@ class Net(torch.nn.Module):
         self.drop_out = torch.nn.Dropout()
         self.fc1 = torch.nn.Linear(65536, 8192)
         self.fc2 = torch.nn.Linear(8192, 1024)
-        self.fc3 = torch.nn.Linear(1024, 128)
+        self.fc3 = torch.nn.Sequential(
+            torch.nn.Linear(1024, 128),
+            torch.nn.Sigmoid()
+        )
 
     def forward(self, x):
         out = self.layer1(x)
@@ -212,7 +223,7 @@ def train(infiles):
     optimizer = torch.optim.Adam(model.parameters())
     criterion = torch.nn.MSELoss()
 
-    N_EPOCHS = 248
+    N_EPOCHS = 512
     CLIP = 1
     FILE_BATCH = 4
 
@@ -233,6 +244,39 @@ def train(infiles):
             torch.save(model.state_dict(), 'convolver_state_dict.pt')
 
         print(epoch, end_time - start_time, train_loss, valid_loss, sep='\t')
+
+
+@main.command()
+@click.argument('infiles', type=click.Path(), nargs=-1)
+def test_generate(infiles):
+    # generate some music based on input data and self feedback
+    model = Net().float()
+    model.load_state_dict(torch.load('convolver_state_dict.pt'))
+    model.eval()
+
+    THRESHOLD = 0.01
+
+    data = load_data(random.sample(infiles, 1))['src'][0:1, :, :, :]
+    # src = torch.from_numpy(data).to(torch.float)
+    src = torch.tensor(data, requires_grad=False, dtype=torch.float)
+    print(type(data), data.shape)
+    for i in range(MIDI_CHUNK):
+        print(i)
+        res = model(src)
+        print(res)
+        nres = res.detach().numpy()
+        nres[nres >= THRESHOLD] = 1.0
+        nres[nres < THRESHOLD] = 0
+        # src[:, :, :, :-1] = src[:, :, :, 1:]
+        newsrc = np.zeros((1, 1, 128, 4096))
+        newsrc[:, :, :, :-1] = src.detach().numpy()[:, :, :, 1:]
+        newsrc[:, :, :, -1] = nres
+        # src[:, :, :, -1] = res
+        src = torch.tensor(newsrc, requires_grad=False, dtype=torch.float)
+
+    plot_vector(src.numpy())
+    test_save_vector_as_midi(src.numpy())
+
 
 
 if __name__ == '__main__':
