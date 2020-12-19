@@ -19,9 +19,9 @@ midi music available for training data.
 - parse midi into some ~~text based format~~ vector of bytes
 - ~~standardize rhythms~~ just use midi quantization
 - generate simple melody version of training data by stripping chords, drums, fast notes
-- transpose to all 12 keys
-- train seq2seq model on generating complex data from simplifyed
-- implement streaming midi to text conversion
+- transpose to all 12 keys (?)
+- train ~~seq2seq~~ model on generating complex data from simplifyed
+- implement streaming midi to text/image conversion
 - feed into network
 - restore output to midi
 
@@ -118,6 +118,14 @@ Supposedly setting requires_grad=False should stop that, but it didn't seem to w
 In addition, this is far too slow for real time music generation running on my cpu.
 It needs to be about 100-1000 times faster I think. Ultimately, it only learned
 to play one note, so, that's not very impressive either...
+
+_2020-12-19_  
+I'm gonna try a final attempt using a straight up RNN, though the part I'm
+struggling with is the new note hinting from a simplified melody. Ultimately,
+the network should process a simple note, but not remember it. The output
+from that should be the output, but then also fed back into the network and
+remembered. It's easy to achieve during final usage I think, but I'm not sure how
+to do it during training.
 
 
 ## Preemptive QnA
